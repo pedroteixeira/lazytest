@@ -28,7 +28,7 @@
     (skipped? [this] false)
     (container? [this] false))
 
-(defrecord TestFailed [source states]
+(defrecord TestFailed [source states reason]
   TestResult
     (success? [this] false)
     (pending? [this] false)
@@ -68,13 +68,7 @@
   (skipped? [this] false)
   (container? [this] true))
 
-(defrecord BinaryEqualityTest [source expected actual]
-  TestResult
-  (success? [this] (= expected actual))
-  (pending? [this] false)
-  (error? [this] false)
-  (skipped? [this] false)
-  (container? [this] false))
+(defrecord NotEqualFailure [expected actual])
 
 (defn container [source children]
   (TestResultContainer. source children))
@@ -82,8 +76,8 @@
 (defn pass [source states]
   (TestPassed. source states))
 
-(defn fail [source states]
-  (TestFailed. source states))
+(defn fail [source states reason]
+  (TestFailed. source states reason))
 
 (defn thrown [source states throwable]
   {:pre [(instance? Throwable throwable)]}
@@ -101,5 +95,5 @@
      {:pre [(nil-or string? reason)]}
      (TestPending. source reason)))
 
-(defn equal? [source expected actual]
-  (BinaryEqualityTest. source expected actual))
+(defn not-equal [expected actual]
+  (NotEqualFailure. expected actual))

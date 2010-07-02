@@ -29,8 +29,8 @@
   (let [example-result (first (:children group-results))
 	example-meta (meta (:source example-result))]
     (assert (not (success? example-result)))
-    (assert (= 10 (:expected example-result)))
-    (assert (= 7 (:actual example-result)))))
+    (assert (= 10 (:expected (:reason example-result))))
+    (assert (= 7 (:actual (:reason example-result))))))
 
 (println "Testing simple-foreach ...")
 (remove-ns 'simple-foreach)

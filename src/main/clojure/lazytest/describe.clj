@@ -4,6 +4,7 @@
 				   firsts)]
         [lazytest.describe.group :only (new-group group? mapping-group)]
         [lazytest.contexts :only (new-context context?)]
+        [lazytest.results :only (not-equal)]
         [lazytest.attach :only (add-group)]))
 
 (let [counter (atom 0)]
@@ -115,17 +116,17 @@
 	  new-group#
 	  (add-group *ns* new-group#))))))
 
-(defn munge-body [body]
-  (let [form (last body)]
-    (concat (butlast body)
-	    (list (cond (= '= (first form))
-			(cons 'lazytest.results/equal? (cons nil (rest form))))
-		  :else form))))
-
-(defn expect [pred & args]
-  (if (and (= = pred) (= 2 (count args)))
-    (apply lazytest.results/equal? nil args)
-    (apply pred args)))
+(defmacro expect [expr]
+  (cond (and (list? expr)
+	     (= '= (first expr))
+	     (= 2 (count (rest expr))))
+	`(let [expected# ~(second expr)
+	       actual# ~(nth expr 2)]
+	   (when-not (= expected# actual#)
+	     (throw (lazytest.AssertionFailed. (not-equal expected# actual#)))))
+	:else
+	`(when-not ~expr
+	   (throw (lazytest.AssertionFailed. nil)))))
 
 (defmacro it
   "Creates a test example within the body of the 'describe' macro.
