@@ -3,4 +3,4 @@
 
 (describe + "with integers"
   (it "should add small numbers"
-    (= 10 (+ 3 4))))
+    (expect = 10 (+ 3 4))))

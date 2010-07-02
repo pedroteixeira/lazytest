@@ -68,6 +68,14 @@
   (skipped? [this] false)
   (container? [this] true))
 
+(defrecord BinaryEqualityTest [source expected actual]
+  TestResult
+  (success? [this] (= expected actual))
+  (pending? [this] false)
+  (error? [this] false)
+  (skipped? [this] false)
+  (container? [this] false))
+
 (defn container [source children]
   (TestResultContainer. source children))
 
@@ -92,3 +100,6 @@
   ([source reason]
      {:pre [(nil-or string? reason)]}
      (TestPending. source reason)))
+
+(defn equal? [source expected actual]
+  (BinaryEqualityTest. source expected actual))

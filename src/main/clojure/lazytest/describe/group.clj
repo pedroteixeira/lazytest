@@ -17,10 +17,13 @@
 		      (:skip m)
 			(skip this (when (string? (:skip m)) (:skip m)))
 		      :else
-                        (try (if (apply f states)
-			       (pass this states)
-			       (fail this states))
-			     (catch Throwable t (thrown this states t))))]
+		      (try (let [result (apply f states)]
+			     (if (extends? lazytest.results/TestResult (type result))
+			       (assoc result :source this)
+			       (if (boolean result)
+				(pass this states)
+				(fail this states))))
+			   (catch Throwable t (thrown this states t))))]
      (reduce close-context active contexts)
      result)))
 

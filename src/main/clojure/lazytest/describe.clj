@@ -115,6 +115,18 @@
 	  new-group#
 	  (add-group *ns* new-group#))))))
 
+(defn munge-body [body]
+  (let [form (last body)]
+    (concat (butlast body)
+	    (list (cond (= '= (first form))
+			(cons 'lazytest.results/equal? (cons nil (rest form))))
+		  :else form))))
+
+(defn expect [pred & args]
+  (if (and (= = pred) (= 2 (count args)))
+    (apply lazytest.results/equal? nil args)
+    (apply pred args)))
+
 (defmacro it
   "Creates a test example within the body of the 'describe' macro.
   Arguments are a documentation string (optional), followed
