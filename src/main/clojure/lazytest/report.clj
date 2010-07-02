@@ -2,7 +2,8 @@
   (:use [lazytest.results
 	 :only (success? container? error? pending? skipped?)]
         [lazytest.color :only (colorize)]
-        [clojure.stacktrace :only (print-cause-trace)])
+        [clojure.stacktrace :only (print-cause-trace)]
+	[clojure.contrib.pprint :only (pprint)])
   (:import (java.io File)))
 
 (defn details
@@ -24,7 +25,7 @@
     (when-let [n (:name m)] (println "Name:" n))
     (when-let [nn (:ns m)] (println "NS:  " (ns-name nn)))
     (when-let [d (:doc m)] (println "Doc: " d))
-    (when-let [e (:expr m)] (println "Expr:" e))
+    (when-let [e (:expr m)] (print "Expr: ") (pprint e))
     (when-let [f (:file m)] (println "File:" f))
     (when-let [l (:line m)] (println "Line:" l))
     (when (seq (:locals m))
