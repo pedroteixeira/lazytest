@@ -148,6 +148,7 @@
 	[opts body] (get-options args)
 	tags (set (:tags opts))
 	metadata (merge (standard-metadata &form doc)
+			(meta &form)
 			{:tags tags
 			 :expr (last body)
 			 :pending (empty? body)}

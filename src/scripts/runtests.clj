@@ -1,6 +1,6 @@
 (use '[lazytest.attach :only (groups)]
      '[lazytest.run :only (run-tests)]
-     '[lazytest.results :only (success? container?)])
+     '[lazytest.results :only (success? container? skipped?)])
 
 (println "Testing simple-pass ...")
 (remove-ns 'simple-pass)
@@ -55,3 +55,30 @@
       (assert (string? (:doc example-meta)))
       (assert (re-matches #".*clojure\.core/\+ with integers should add small numbers.*"
 			  (:doc example-meta))))))
+
+(println "Testing skip-example ...")
+(remove-ns 'skip-example)
+(load "src/examples/skip_example")
+(let [group-results (run-tests (first (groups 'skip-example)))
+      group-meta (meta (:source group-results))]
+  (assert (success? group-results))
+  (assert (container? group-results))
+  (assert (= 2 (count (:children group-results))))
+  (let [example-result (first (:children group-results))
+	example-meta (meta (:source example-result))]
+    (assert (success? example-result))
+    (assert (skipped? example-result))))
+
+(println "Testing skip-example-with-meta ...")
+(remove-ns 'skip-example-with-meta)
+(load "src/examples/skip_example_with_meta")
+(let [group-results (run-tests (first (groups 'skip-example-with-meta)))
+      group-meta (meta (:source group-results))]
+  (assert (success? group-results))
+  (assert (container? group-results))
+  (assert (= 2 (count (:children group-results))))
+  (let [example-result (first (:children group-results))
+	example-meta (meta (:source example-result))]
+    (assert (success? example-result))
+    (assert (skipped? example-result))))
+
