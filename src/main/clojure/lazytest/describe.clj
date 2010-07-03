@@ -118,7 +118,8 @@
 
 (defmacro expect [expr]
   (cond (and (list? expr)
-	     (= '= (first expr))
+	     (symbol? (first expr))
+	     (= #'clojure.core/= (resolve (first expr)))
 	     (= 2 (count (rest expr))))
 	`(let [expected# ~(second expr)
 	       actual# ~(nth expr 2)]
