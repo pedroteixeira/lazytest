@@ -7,7 +7,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.stuartsierra</groupId>
+  <groupId>com.intelie</groupId>
   <artifactId>lazytest</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <url>http://stuartsierra.com/</url>
