@@ -22,7 +22,8 @@
 			       (pass this-with-state)
 			       (catch ExpectationFailed e (fail this-with-state (.reason e)))
 			       (catch Throwable e (thrown this-with-state e))))
-			(catch Throwable e (thrown this e))))))))
+			(catch Throwable e (thrown this e))
+                        (finally (doall (map teardown fixtures)))))))))
 
 (defn test-case
   ([fixtures f] (test-case fixtures f nil))
