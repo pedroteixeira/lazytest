@@ -37,8 +37,11 @@
   [& args]
   (apply str (interpose \space (remove nil? args))))
 
-(defn- merged-metadata [form docstring extra-attr-map]
-  (merge {:doc docstring, :file *file*, :ns *ns*} (meta form) extra-attr-map))
+(defn- merged-metadata [body form docstring extra-attr-map]
+  (merge (when (empty? body) {:pending true})
+	 {:doc docstring, :file *file*, :ns *ns*}
+	 (meta form)
+	 extra-attr-map))
 
 ;;; Local Variable Scope
 
@@ -94,7 +97,7 @@
 	[attr-map body] (get-arg map? decl)
 	children (vec body)
 	docstring (strcat (when sym (resolve sym)) doc)
-	metadata (merged-metadata &form docstring attr-map)]
+	metadata (merged-metadata body &form docstring attr-map)]
     `(def-unless-nested (test-group ~children ~metadata))))
 
 (defmacro given [& decl]
@@ -102,35 +105,40 @@
 	[attr-map decl] (get-arg map? decl)
 	[bindings body] (get-arg vector? decl)
 	children (vec body)
-	metadata (merged-metadata &form doc attr-map)]
+	metadata (merged-metadata body &form doc attr-map)]
     (assert (vector? bindings))
     (assert (even? (count bindings)))
     (let [binding-forms (firsts bindings)
 	  fixtures (map (fn [x] `(function-fixture (fn ~(find-locals &env) ~x)))
 			(seconds bindings))
 	  local-bindings (vec (interleave binding-forms fixtures))]      
-      `(def-unless-nested
-	 (wrap-local-scope ~local-bindings (test-group ~children ~metadata))))))
+      `(wrap-local-scope ~local-bindings (test-group ~children ~metadata)))))
 
 (defmacro using [& decl]
   (let [[doc decl] (get-arg string? decl)
 	[attr-map decl] (get-arg map? decl)
 	[bindings body] (get-arg vector? decl)
 	children (vec body)
-	metadata (merged-metadata &form doc attr-map)]
+	metadata (merged-metadata body &form doc attr-map)]
     (assert (vector? bindings))
     (assert (even? (count bindings)))
     (let [binding-forms (firsts bindings)
 	  fixtures (seconds bindings)
 	  local-bindings (vec (interleave binding-forms fixtures))]      
-      `(def-unless-nested
-	 (wrap-local-scope ~local-bindings (test-group ~children ~metadata))))))
+      `(wrap-local-scope ~local-bindings (test-group ~children ~metadata)))))
 
 (defmacro it [& decl]
   (let [[sym decl] (get-arg symbol? decl)
 	[doc decl] (get-arg string? decl)
 	[attr-map body] (get-arg map? decl)
-	metadata (merged-metadata &form doc attr-map)]
-    `(def-unless-nested
-       (test-case ~(find-locals &env)
-		  (fn ~(find-local-binding-forms &env) ~@body) ~metadata))))
+	metadata (merged-metadata body &form doc attr-map)]
+    `(test-case ~(find-locals &env)
+		(fn ~(find-local-binding-forms &env) (expect ~@body)) ~metadata)))
+
+(defmacro do-it [& decl]
+  (let [[sym decl] (get-arg symbol? decl)
+	[doc decl] (get-arg string? decl)
+	[attr-map body] (get-arg map? decl)
+	metadata (merged-metadata body &form doc attr-map)]
+    `(test-case ~(find-locals &env)
+		(fn ~(find-local-binding-forms &env) ~@body) ~metadata)))
