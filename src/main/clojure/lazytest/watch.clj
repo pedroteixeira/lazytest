@@ -38,7 +38,12 @@
 	(doseq [n names] (remove-ns n))
 	(doseq [n names] (require n :reload))
 	(println "Running examples at" (java.util.Date.))
-	(reporter (mapcat run-tests (mapcat get-tests (all-ns))))
+
+        (doseq [n (all-ns)]
+          (let [tests (get-tests n)]
+            (when-not (empty? tests)
+              (println "Running tests in " n))          
+            (reporter (mapcat run-tests tests))))        
 	(println "\nDone.")))
     (catch Throwable t
       (println "ERROR:" t)
